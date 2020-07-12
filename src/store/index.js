@@ -19,10 +19,24 @@ fb.postsCollection.orderBy('createdOn', 'desc').onSnapshot(snapshot => {
   store.commit('setPosts', postsArray)
 })
 
+fb.commentsCollection.orderBy('createdOn', 'desc').onSnapshot(snapshot => {
+  let commentsArray = []
+
+  snapshot.forEach(doc => {
+    let comment = doc.data()
+    comment.id = doc.id
+
+    commentsArray.push(comment)
+  })
+
+  store.commit('setComments', commentsArray)
+})
+
 const store = new Vuex.Store({
   state: {
     userProfile: {},
-    posts: []
+    posts: [],
+    comments: []
   },
   mutations: {
     setUserProfile(state, val) {
@@ -30,6 +44,9 @@ const store = new Vuex.Store({
     },
     setPosts(state, val) {
       state.posts = val
+    },
+    setComments(state, val) {
+      state.comments = val
     }
   },
   actions: {
@@ -79,9 +96,18 @@ const store = new Vuex.Store({
         content: post.content,
         userId: fb.auth.currentUser.uid,
         userName: state.userProfile.name,
-        comments: 0,
         likes: 0
       })
+    },
+    async createComment({ state, commit }, {comment, post}) {
+      // create comment in firebase
+      await fb.commentsCollection.add({
+        createdOn: new Date(),
+        content: comment,
+        postId: post.id,
+        userId: fb.auth.currentUser.uid,
+        userName: state.userProfile.name,
+      });
     },
     async likePost({ commit }, post) {
       const userId = fb.auth.currentUser.uid

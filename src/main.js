@@ -8,7 +8,6 @@ import './assets/scss/app.scss'
 
 Vue.config.productionTip = false
 
-// Adding comments to a post when viewing the full post
 // Allowing a user to edit or delete their comments and posts
 // Creating additional userProfile information
 // Letting users add other users as friends

@@ -23,7 +23,7 @@
             <p>{{ post.content | trimLength }}</p>
             <ul>
               <li>
-                <a @click="toggleCommentModal(post)">comments {{ post.comments }}</a>
+                <a @click="toggleCommentModal(post)">comments {{ getPostComments(post.id).length }}</a>
               </li>
               <li>
                 <a @click="likePost(post.id, post.likes)">likes {{ post.likes }}</a>
@@ -42,7 +42,12 @@
 
     <!-- new comment modal -->
     <transition name="fade">
-      <CommentModal v-if="showCommentModal" :post="selectedPost" @close="toggleCommentModal()"></CommentModal>
+      <div v-if="showCommentModal" class="c-modal">
+        <div class="c-container">
+          <a @click="showCommentModal = false">close</a>
+          <AddCommentForm :post="currentPost" @close="toggleCommentModal()"></AddCommentForm>
+        </div>
+      </div>
     </transition>
     <!-- full post modal -->
     <transition name="fade">
@@ -50,18 +55,21 @@
         <div class="p-container">
           <a @click="closePostModal()" class="close">close</a>
           <div class="post">
-            <h5>{{ fullPost.userName }}</h5>
-            <span>{{ fullPost.createdOn | formatDate }}</span>
-            <p>{{ fullPost.content }}</p>
+            <h5>{{ currentPost.userName }}</h5>
+            <span>{{ currentPost.createdOn | formatDate }}</span>
+            <p>{{ currentPost.content }}</p>
             <ul>
-              <a @click="toggleCommentModal(fullPost)">comments {{ fullPost.comments }}</a>
               <li>
-                <a>likes {{ fullPost.likes }}</a>
+                  <a @click="toggleCommentModal(currentPost)">comments {{ computedPostComments.length }}</a>
+              </li>
+              <li>
+                <a>likes {{ currentPost.likes }}</a>
               </li>
             </ul>
           </div>
-          <div v-show="postComments.length" class="comments">
-            <div v-for="comment in postComments" :key="comment.id" class="comment">
+          <AddCommentForm :post="currentPost"></AddCommentForm>
+          <div v-show="computedPostComments.length" class="comments">
+            <div v-for="comment in computedPostComments" :key="comment.id" class="comment">
               <p>{{ comment.userName }}</p>
               <span>{{ comment.createdOn | formatDate }}</span>
               <p>{{ comment.content }}</p>
@@ -76,7 +84,7 @@
 <script>
 import { mapState } from "vuex";
 import moment from "moment";
-import CommentModal from "@/components/CommentModal.vue";
+import AddCommentForm from "@/components/AddCommentForm.vue";
 import { commentsCollection } from "@/firebase";
 
 export default {
@@ -86,18 +94,20 @@ export default {
         content: ""
       },
       showCommentModal: false,
-    //   showCommentField: false,
-      selectedPost: {},
+      currentPost: {},
       showPostModal: false,
-      fullPost: {},
-      postComments: []
     };
   },
   components: {
-    CommentModal
+    AddCommentForm
   },
   computed: {
-    ...mapState(["userProfile", "posts"])
+    ...mapState(["userProfile", "posts", "comments"]),
+    computedPostComments() {
+      return this.comments.filter(
+        comment => comment.postId === this.currentPost.id
+      );
+    }
   },
   methods: {
     createPost() {
@@ -109,40 +119,24 @@ export default {
 
       // if opening modal set selectedPost, else clear
       if (this.showCommentModal) {
-        this.selectedPost = post;
+        this.currentPost = post;
       } else {
-        this.selectedPost = {};
+        this.currentPost = {};
       }
     },
-    // appendCommentField(post) {
-    //   this.showCommentField = !this.showCommentField;
-
-    //   // if opening modal set selectedPost, else clear
-    //   if (this.showCommentField) {
-    //     this.selectedPost = post;
-    //   } else {
-    //     this.selectedPost = {};
-    //   }
-    // },
+    getPostComments(id) {
+      return this.comments.filter(
+        comment => comment.postId === id
+      );
+    },
     likePost(id, likesCount) {
       this.$store.dispatch("likePost", { id, likesCount });
     },
-    async viewPost(post) {
-      const docs = await commentsCollection
-        .where("postId", "==", post.id)
-        .get();
-
-      docs.forEach(doc => {
-        let comment = doc.data();
-        comment.id = doc.id;
-        this.postComments.push(comment);
-      });
-
-      this.fullPost = post;
+    viewPost(post) {
+      this.currentPost = post;
       this.showPostModal = true;
     },
     closePostModal() {
-      this.postComments = [];
       this.showPostModal = false;
     }
   },
