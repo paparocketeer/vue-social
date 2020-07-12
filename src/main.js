@@ -4,15 +4,27 @@ import router from './router'
 import store from './store'
 import { auth } from './firebase'
 
+import './assets/scss/app.scss'
+
 Vue.config.productionTip = false
 
+// Adding comments to a post when viewing the full post
+// Allowing a user to edit or delete their comments and posts
+// Creating additional userProfile information
+// Letting users add other users as friends
+// Adding better error handling using try/catch for all requests
+
 let app
-auth.onAuthStateChanged(() => {
+auth.onAuthStateChanged(user => {
   if (!app) {
     app = new Vue({
       router,
       store,
       render: h => h(App)
     }).$mount('#app')
+  }
+
+  if (user) {
+    store.dispatch('fetchUserProfile', user)
   }
 })

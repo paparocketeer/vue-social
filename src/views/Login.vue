@@ -85,6 +85,9 @@ export default {
         password: this.loginForm.password
       })
     },
+    logout() {
+      this.$store.dispatch('logout')
+    },
     signup() {
       this.$store.dispatch('signup', {
         email: this.signupForm.email,
