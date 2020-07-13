@@ -10,11 +10,21 @@
           <h1>Welcome Back</h1>
           <div>
             <label for="email1">Email</label>
-            <input v-model.trim="loginForm.email" type="text" placeholder="you@email.com" id="email1" />
+            <input
+              v-model.trim="loginForm.email"
+              type="text"
+              placeholder="you@email.com"
+              id="email1"
+            />
           </div>
           <div>
             <label for="password1">Password</label>
-            <input v-model.trim="loginForm.password" type="password" placeholder="******" id="password1" />
+            <input
+              v-model.trim="loginForm.password"
+              type="password"
+              placeholder="******"
+              id="password1"
+            />
           </div>
           <button @click="login()" class="button">Log In</button>
           <div class="extras">
@@ -34,11 +44,33 @@
           </div>
           <div>
             <label for="email2">Email</label>
-            <input v-model.trim="signupForm.email" type="text" placeholder="you@email.com" id="email2" />
+            <input
+              v-model.trim="signupForm.email"
+              type="text"
+              placeholder="you@email.com"
+              id="email2"
+            />
+          </div>
+          <div>
+            <button class="warning" @click="triggerUpload">Upload</button>
+            <input
+              ref="fileInput"
+              type="file"
+              style="display: none;"
+              accept="image/*"
+              @change="onFileChange"
+            />
+            <img src="@/assets/img/incognito.jpg" height="100" v-if="signupForm.image == null" />
+            <img :src="imageSrc" height="100" v-else />
           </div>
           <div>
             <label for="password2">Password</label>
-            <input v-model.trim="signupForm.password" type="password" placeholder="min 6 characters" id="password2" />
+            <input
+              v-model.trim="signupForm.password"
+              type="password"
+              placeholder="min 6 characters"
+              id="password2"
+            />
           </div>
           <button @click="signup()" class="button">Sign Up</button>
           <div class="extras">
@@ -51,7 +83,7 @@
 </template>
 
 <script>
-import PasswordReset from '@/components/PasswordReset'
+import PasswordReset from "@/components/PasswordReset";
 export default {
   components: {
     PasswordReset
@@ -59,43 +91,61 @@ export default {
   data() {
     return {
       loginForm: {
-        email: '',
-        password: ''
+        email: "",
+        password: ""
       },
       signupForm: {
-        name: '',
-        title: '',
-        email: '',
-        password: ''
+        name: "",
+        title: "",
+        image: null,
+        email: "",
+        password: ""
       },
+      imageSrc: "",
       showLoginForm: true,
       showPasswordReset: false
-    }
+    };
   },
   methods: {
     toggleForm() {
-      this.showLoginForm = !this.showLoginForm
+      this.showLoginForm = !this.showLoginForm;
     },
     togglePasswordReset() {
-      this.showPasswordReset = !this.showPasswordReset
+      this.showPasswordReset = !this.showPasswordReset;
     },
     login() {
-      this.$store.dispatch('login', {
+      this.$store.dispatch("login", {
         email: this.loginForm.email,
         password: this.loginForm.password
-      })
+      });
     },
     logout() {
-      this.$store.dispatch('logout')
+      this.$store.dispatch("logout");
     },
     signup() {
-      this.$store.dispatch('signup', {
-        email: this.signupForm.email,
-        password: this.signupForm.password,
-        name: this.signupForm.name,
-        title: this.signupForm.title
-      })
+      if (this.signupForm.image) {
+        this.$store.dispatch("signup", {
+          email: this.signupForm.email,
+          password: this.signupForm.password,
+          name: this.signupForm.name,
+          title: this.signupForm.title,
+          image: this.signupForm.image
+        });
+      }
+    },
+    triggerUpload() {
+      this.$refs.fileInput.click();
+    },
+    onFileChange(event) {
+      const file = event.target.files[0];
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        this.imageSrc = reader.result;
+      };
+      reader.readAsDataURL(file);
+      this.signupForm.image = file;
     }
   }
-}
+};
 </script>

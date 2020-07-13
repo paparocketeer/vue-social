@@ -67,11 +67,24 @@ const store = new Vuex.Store({
     async signup({ dispatch }, form) {
       // sign user up
       const { user } = await fb.auth.createUserWithEmailAndPassword(form.email, form.password)
+      let avatar = ''
+      if (form.image.name) {
+      const imageExt = form.image.name.slice(form.image.name.lastIndexOf('.'))
+
+      const fileData = await fb.storage.ref(`avatars/${user.uid}.${imageExt}`).put(form.image)
+      const imageSrc = await fb.storage.ref().child((await fileData).metadata.fullPath).getDownloadURL()
+      avatar = imageSrc
+      }
+
+      // await fb.database().ref('users').child(user.uid).update({
+      //   avatar: imageSrc
+      // })
 
       // create user profile object in userCollections
       await fb.usersCollection.doc(user.uid).set({
         name: form.name,
-        title: form.title
+        title: form.title,
+        avatar
       })
 
       // fetch user profile and set in state
