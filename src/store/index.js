@@ -19,6 +19,19 @@ fb.postsCollection.orderBy('createdOn', 'desc').onSnapshot(snapshot => {
   store.commit('setPosts', postsArray)
 })
 
+fb.usersCollection.onSnapshot(snapshot => {
+  let usersArray = []
+
+  snapshot.forEach(doc => {
+    let user = doc.data()
+    user.id = doc.id
+
+    usersArray.push(user)
+  })
+
+  store.commit('setUsers', usersArray)
+})
+
 fb.commentsCollection.orderBy('createdOn', 'desc').onSnapshot(snapshot => {
   let commentsArray = []
 
@@ -36,7 +49,8 @@ const store = new Vuex.Store({
   state: {
     userProfile: {},
     posts: [],
-    comments: []
+    comments: [],
+    users: []
   },
   mutations: {
     setUserProfile(state, val) {
@@ -47,6 +61,14 @@ const store = new Vuex.Store({
     },
     setComments(state, val) {
       state.comments = val
+    },
+    setUsers(state, val) {
+      state.users = val
+    }
+  },
+  getters: {
+    getUserById: state => id => {
+      return state.users.find(user => user.id == id);
     }
   },
   actions: {
@@ -67,8 +89,14 @@ const store = new Vuex.Store({
     async signup({ dispatch }, form) {
       // sign user up
       const { user } = await fb.auth.createUserWithEmailAndPassword(form.email, form.password)
-      let avatar = ''
-      if (form.image.name) {
+
+      await fb.usersCollection.doc(user.uid).set({
+        name: form.name
+      })
+
+
+      let avatar = '../assets/img/incognito.jpg'
+      if (form.image) {
       const imageExt = form.image.name.slice(form.image.name.lastIndexOf('.'))
 
       const fileData = await fb.storage.ref(`avatars/${user.uid}.${imageExt}`).put(form.image)
@@ -76,14 +104,7 @@ const store = new Vuex.Store({
       avatar = imageSrc
       }
 
-      // await fb.database().ref('users').child(user.uid).update({
-      //   avatar: imageSrc
-      // })
-
-      // create user profile object in userCollections
-      await fb.usersCollection.doc(user.uid).set({
-        name: form.name,
-        title: form.title,
+      await fb.usersCollection.doc(user.uid).update({
         avatar
       })
 
@@ -145,8 +166,7 @@ const store = new Vuex.Store({
       const userId = fb.auth.currentUser.uid
       // update user object
       const userRef = await fb.usersCollection.doc(userId).update({
-        name: user.name,
-        title: user.title
+        name: user.name
       })
 
       dispatch('fetchUserProfile', { uid: userId })

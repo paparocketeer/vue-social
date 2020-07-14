@@ -9,7 +9,6 @@ import './assets/scss/app.scss'
 Vue.config.productionTip = false
 
 // Allowing a user to edit or delete their comments and posts
-// Creating additional userProfile information
 // Letting users add other users as friends
 // Adding better error handling using try/catch for all requests
 

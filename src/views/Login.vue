@@ -39,10 +39,6 @@
             <input v-model.trim="signupForm.name" type="text" placeholder="Savvy Apps" id="name" />
           </div>
           <div>
-            <label for="title">Title</label>
-            <input v-model.trim="signupForm.title" type="text" placeholder="Company" id="title" />
-          </div>
-          <div>
             <label for="email2">Email</label>
             <input
               v-model.trim="signupForm.email"
@@ -96,7 +92,6 @@ export default {
       },
       signupForm: {
         name: "",
-        title: "",
         image: null,
         email: "",
         password: ""
@@ -123,15 +118,12 @@ export default {
       this.$store.dispatch("logout");
     },
     signup() {
-      if (this.signupForm.image) {
         this.$store.dispatch("signup", {
           email: this.signupForm.email,
           password: this.signupForm.password,
           name: this.signupForm.name,
-          title: this.signupForm.title,
           image: this.signupForm.image
         });
-      }
     },
     triggerUpload() {
       this.$refs.fileInput.click();
