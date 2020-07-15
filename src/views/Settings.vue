@@ -12,8 +12,19 @@
         <label for="name">Name</label>
         <input v-model.trim="name" type="text" :placeholder="userProfile.name" id="name" />
 
-        <label for="title">Job Title</label>
-        <input v-model.trim="title" type="text" :placeholder="userProfile.title" id="title" />
+        <div class="avatar-upload">
+          <label for="title">Avatar</label>
+        <button class="warning" @click="triggerUpload">Upload</button>
+        <input
+              ref="fileInput"
+              type="file"
+              style="display: none;"
+              accept="image/*"
+              @change="onFileChange"
+            />
+        <img :src="this.userProfile.avatar" v-if="!imageSrc.length"/>
+        <img :src="imageSrc" v-else />
+        </div>
 
         <button @click="updateProfile()" class="button">Update Profile</button>
       </form>
@@ -28,7 +39,8 @@ export default {
   data() {
     return {
       name: "",
-      title: "",
+      imageSrc: "",
+      image: null,
       showSuccess: false
     };
   },
@@ -36,14 +48,26 @@ export default {
     ...mapState(["userProfile"])
   },
   methods: {
+    triggerUpload() {
+      this.$refs.fileInput.click();
+    },
+    onFileChange(event) {
+      const file = event.target.files[0];
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        this.imageSrc = reader.result;
+      };
+      reader.readAsDataURL(file);
+      this.image = file;
+    },
     updateProfile() {
       this.$store.dispatch("updateProfile", {
         name: this.name !== "" ? this.name : this.userProfile.name,
-        title: this.title !== "" ? this.title : this.userProfile.title
+        image: this.image
       });
 
       this.name = "";
-      this.title = "";
 
       this.showSuccess = true;
 

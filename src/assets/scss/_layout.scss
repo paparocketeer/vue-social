@@ -416,3 +416,18 @@ header {
     margin-top: 2rem;
   }
 }
+
+.avatar-upload{
+  display: flex;
+  flex-direction: column;
+
+  button{
+    width: 100px;
+    margin-bottom: .5em;
+  }
+
+  img{
+    width: 100px;
+    height: 100px;
+  }
+}
