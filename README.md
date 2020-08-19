@@ -1,4 +1,7 @@
-# vue-social
+Vue example Socail Network App using firebase
+
+[Demo](https://vue-social.netlify.app/)
+
 
 ## Project setup
 ```
