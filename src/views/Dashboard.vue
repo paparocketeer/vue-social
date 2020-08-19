@@ -19,10 +19,10 @@
       </div>
       <div class="col2">
         <div v-if="posts.length">
-          <div v-for="pst in posts" :key="pst.id" class="post">
+          <div v-for="post in posts" :key="post.id" class="post">
             <div class="avatar">
-              <img :src="getAuthorAvatar(pst.userId)" alt="">
-              <h5>{{ getAuthorName(pst.userId) }}</h5>            
+              <img :src="getAuthorAvatar(post.userId)" alt="">
+              <h5>{{ getAuthorName(post.userId) }}</h5>            
             </div>
             <span>{{ post.createdOn | formatDate }}</span>
             <p>{{ post.content | trimLength }}</p>
