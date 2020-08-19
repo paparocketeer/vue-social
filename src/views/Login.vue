@@ -47,7 +47,7 @@
               id="email2"
             />
           </div>
-          <div>
+          <div class="avatar-upload">
             <button class="warning" @click="triggerUpload">Upload</button>
             <input
               ref="fileInput"
@@ -56,7 +56,7 @@
               accept="image/*"
               @change="onFileChange"
             />
-            <img src="@/assets/img/incognito.jpg" height="100" v-if="signupForm.image == null" />
+            <img src="/img/incognito.jpg" height="100" v-if="signupForm.image == null" />
             <img :src="imageSrc" height="100" v-else />
           </div>
           <div>

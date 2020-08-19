@@ -69,7 +69,10 @@ const store = new Vuex.Store({
   getters: {
     getUserById: state => id => {
       return state.users.find(user => user.id == id);
-    }
+    },
+    getCommentsById: state => id => {
+      return state.comments.filter(comment => comment.postId == id);
+    },
   },
   actions: {
     async login({ dispatch }, form) {
@@ -95,7 +98,7 @@ const store = new Vuex.Store({
       })
 
 
-      let avatar = '../assets/img/incognito.jpg'
+      let avatar = '/img/incognito.jpg'
       if (form.image) {
       const imageExt = form.image.name.slice(form.image.name.lastIndexOf('.'))
 
@@ -162,30 +165,25 @@ const store = new Vuex.Store({
         likes: post.likesCount + 1
       })
     },
-    async updateProfile({ dispatch }, user) {
+    async updateProfile({ dispatch }, updated) {
       const userId = fb.auth.currentUser.uid
       // update user object
       const userRef = await fb.usersCollection.doc(userId).update({
-        name: user.name
+        name: updated.name
       })
+
+      if (updated.image) {
+        const imageExt = updated.image.name.slice(updated.image.name.lastIndexOf('.'))
+  
+        const fileData = await fb.storage.ref(`avatars/${userId}.${imageExt}`).put(updated.image)
+        const imageSrc = await fb.storage.ref().child((await fileData).metadata.fullPath).getDownloadURL()
+        await fb.usersCollection.doc(userId).update({
+          avatar: imageSrc
+        })
+        }
+        
 
       dispatch('fetchUserProfile', { uid: userId })
-
-      // update all posts by user
-      const postDocs = await fb.postsCollection.where('userId', '==', userId).get()
-      postDocs.forEach(doc => {
-        fb.postsCollection.doc(doc.id).update({
-          userName: user.name
-        })
-      })
-
-      // update all comments by user
-      const commentDocs = await fb.commentsCollection.where('userId', '==', userId).get()
-      commentDocs.forEach(doc => {
-        fb.commentsCollection.doc(doc.id).update({
-          userName: user.name
-        })
-      })
     }
   }
 })
