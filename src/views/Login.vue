@@ -3,7 +3,7 @@
     <PasswordReset v-if="showPasswordReset" @close="togglePasswordReset()"></PasswordReset>
     <section>
       <div class="col1">
-        <h1>Social Network App</h1>
+        <h1>Vuegram</h1>
       </div>
       <div :class="{ 'signup-form': !showLoginForm }" class="col2">
         <form v-if="showLoginForm" @submit.prevent>
