@@ -18,13 +18,6 @@
         </div>
       </div>
       <div class="col2">
-<<<<<<< HEAD
-        <div v-if="posts.length">
-          <div v-for="post in posts" :key="post.id" class="post">
-            <div class="avatar">
-              <img :src="getAuthorAvatar(post.userId)" alt="">
-              <h5>{{ getAuthorName(post.userId) }}</h5>            
-=======
         <svg v-if="loading" class="spinner" viewBox="0 0 50 50">
           <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
         </svg>
@@ -32,9 +25,8 @@
           <div v-for="post in posts" :key="post.id" class="post">
             <div class="avatar">
               <img :src="getAuthor(post.userId).avatar" alt="">
-              <h5>{{ getAuthor(post.userId).name }}</h5>            
->>>>>>> 8740ef040abc37b69a8aa0400c40c0def52feac6
-            </div>
+              <h5>{{ getAuthor(post.userId).name }}</h5> 
+            </div> 
             <span>{{ post.createdOn | formatDate }}</span>
             <p>{{ post.content | trimLength }}</p>
             <ul>
@@ -50,7 +42,7 @@
             </ul>
           </div>
         </div>
-        <div v-else-if="posts && post.length==0">
+        <div v-else>
           <p class="no-results">There are currently no posts</p>
         </div>
       </div>
@@ -72,14 +64,14 @@
           <a @click="closePostModal()" class="close">close</a>
           <div class="post">
             <div class="avatar">
-                <img :src="getAuthor(currentPost.userId).avatar" alt="">
-                <h5>{{ getAuthor(currentPost.userId).name }}</h5>            
+                <img :src="getAuthorAvatar(currentPost.userId)" alt="">
+                <h5>{{ getAuthorName(currentPost.userId) }}</h5>            
             </div>
             <span>{{ currentPost.createdOn | formatDate }}</span>
             <p>{{ currentPost.content }}</p>
             <ul>
               <li>
-                  <a>comments {{ getPostComments(currentPost.id).length }}</a>
+                  <a>comments {{ computedPostComments.length }}</a>
               </li>
               <li>
                 <a @click="likePost(currentPost.id, currentPost.likes)">likes {{ currentPost.likes }}</a>
@@ -87,11 +79,11 @@
             </ul>
           </div>
           <AddCommentForm :post="currentPost"></AddCommentForm>
-          <div v-show="getPostComments(currentPost.id).length" class="comments">
-            <div v-for="comment in getPostComments(currentPost.id)" :key="comment.id" class="comment">
+          <div v-show="computedPostComments.length" class="comments">
+            <div v-for="comment in computedPostComments" :key="comment.id" class="comment">
               <div class="avatar">
-                <img :src="getAuthor(comment.userId).avatar" alt="">
-                <h5>{{ getAuthor(comment.userId).name }}</h5>            
+                <img :src="getAuthorAvatar(comment.userId)" alt="">
+                <h5>{{ getAuthorName(comment.userId) }}</h5>            
               </div>
               <span>{{ comment.createdOn | formatDate }}</span>
               <p>{{ comment.content }}</p>
@@ -115,7 +107,6 @@ export default {
       post: {
         content: ""
       },
-      loading: true,
       showCommentModal: false,
       currentPost: {},
       showPostModal: false,
@@ -127,9 +118,16 @@ export default {
   computed: {
     ...mapState(["userProfile", "posts", "comments"]),
     ...mapGetters([
-    'getUserById',
-    'getCommentsById'
+    'getUserById'
   ]),
+    computedPostComments() {
+      return this.comments.filter(
+        comment => comment.postId === this.currentPost.id
+      );
+    }
+    // getUserById(id){
+    //   return this.$store.getters.getUserById(id)
+    // }
   },
   methods: {
     createPost() {
@@ -146,12 +144,16 @@ export default {
         this.currentPost = {};
       }
     },
-    getPostComments(postId) {
-      return this.getCommentsById(postId) ? this.getCommentsById(postId) : {}
+    getPostComments(id) {
+      return this.comments.filter(
+        comment => comment.postId === id
+      );
     },
-    getAuthor(postId){   
-      this.loading = this.getUserById(postId) ? false : true 
-      return this.getUserById(postId) ? this.getUserById(postId) : {}
+    getAuthorAvatar(postId){      
+      return this.$store.getters.getUserById(postId).avatar
+    },
+    getAuthorName(postId){      
+      return this.$store.getters.getUserById(postId).name
     },
     likePost(id, likesCount) {
       this.$store.dispatch("likePost", { id, likesCount });
@@ -179,12 +181,7 @@ export default {
       }
       return `${val.substring(0, 200)}...`;
     }
-  },
-  // created () {
-  //   if (this.posts.length) {
-  //     this.loading = false
-  //   }    
-  // }
+  }
 };
 </script>
 
